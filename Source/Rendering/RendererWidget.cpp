@@ -105,7 +105,7 @@ void RendererWidget::initializeGL()
     uniformManager_ = new UniformManager();
     
     // Create assets
-    shadowMap_ = new ShadowMap(scene_, uniformManager_, 2, 4096);
+    shadowMap_ = new ShadowMap(scene_, uniformManager_, 4, 2048);
     shadowMask_ = new ShadowMask(uniformManager_, SMM_Combined);
     
     // Create and build the voxel tree

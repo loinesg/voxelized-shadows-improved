@@ -35,7 +35,7 @@ int getTreeResolution(int argc, char* argv[])
     if(flagSet("512k", argc, argv)) return 524288;
     
     // No flag set, use 32K as the default
-    return 32768;
+    return 65536;
 }
 
 int main(int argc, char* argv[])

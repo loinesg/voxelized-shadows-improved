@@ -63,14 +63,14 @@ MainWindow::MainWindow(bool fullScreen, const QGLFormat &format, int voxelResolu
     // Create shadow resolution radios
     createShadowResolutionRadio(512);
     createShadowResolutionRadio(1024);
-    createShadowResolutionRadio(2048);
-    createShadowResolutionRadio(4096)->setChecked(true); // Default = 4096
+    createShadowResolutionRadio(2048)->setChecked(true); // Default = 2048
+    createShadowResolutionRadio(4096);
     
     // Create shadow cascades radios
     createShadowCascadesRadio(1);
-    createShadowCascadesRadio(2)->setChecked(true); // Default = 2
+    createShadowCascadesRadio(2);
     createShadowCascadesRadio(3);
-    createShadowCascadesRadio(4);
+    createShadowCascadesRadio(4)->setChecked(true); // Default = 4
     
     // Create voxel pcf kernel size radios
     createVoxelPCFFilterSizeRadio(0);
