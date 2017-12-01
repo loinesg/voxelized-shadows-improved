@@ -4,6 +4,7 @@ RendererStats::RendererStats()
     : frameTimer_(),
     passStats_(),
     currentPass_(-1),
+    totalSamples_(0),
     samplePeriodStart_(0),
     sampleFrameCount_(0),
     avgFrameRate_(-1),
@@ -92,6 +93,7 @@ void RendererStats::frameStarted()
         
         // Reset the samples count
         sampleFrameCount_ = 0;
+        totalSamples_ ++;
     }
     
     // If a new sample period has just started, record the start time

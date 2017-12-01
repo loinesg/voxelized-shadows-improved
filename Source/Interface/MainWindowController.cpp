@@ -3,6 +3,7 @@
 MainWindowController::MainWindowController(MainWindow* window)
     : window_(window),
     inputManager_(),
+    performanceTest_(window->rendererWidget()),
     mouseDragging_(false),
     mousePosition_(Vector2(0, 0))
 {
@@ -41,6 +42,9 @@ MainWindowController::MainWindowController(MainWindow* window)
     {
         connect(window_->voxelPCFFilterSizeRadios()[i], SIGNAL(toggled(bool)), SLOT(voxelPCFFilterSizeToggled()));
     }
+    
+    // Start the performance test
+    performanceTest_.startTest();
 }
 
 bool MainWindowController::eventFilter(QObject* obj, QEvent* event)
@@ -146,8 +150,14 @@ void MainWindowController::voxelPCFFilterSizeToggled()
 
 void MainWindowController::update(float deltaTime)
 {
+    // Update performance tests
+    performanceTest_.update();
+    
     // Move the camera with user input
-    applyCameraMovement(deltaTime);
+    if(performanceTest_.isRunning() == false)
+    {
+        applyCameraMovement(deltaTime);
+    }
     
     // Update the statistics ui
     updateStatsUI();

@@ -6,6 +6,7 @@
 #include "MainWindow.hpp"
 #include "Input.hpp"
 #include "Vector2.hpp"
+#include "PerformanceTest.hpp"
 
 class MainWindowController : public QObject
 {
@@ -32,6 +33,7 @@ public slots:
 private:
     MainWindow* window_;
     InputManager inputManager_;
+    PerformanceTest performanceTest_;
     
     bool mouseDragging_;
     Vector2 mousePosition_;

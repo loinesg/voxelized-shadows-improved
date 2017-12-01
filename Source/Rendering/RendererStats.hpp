@@ -25,11 +25,13 @@ struct RenderPassStats
 class RendererStats : protected QOpenGLFunctions_3_3_Core
 {
 private:
-    const int FramesPerSample = 120;
+    const int FramesPerSample = 200;
     
 public:
     RendererStats();
     ~RendererStats();
+    
+    int totalSamples() const { return totalSamples_; }
     
     // Gets the stats for each pass
     int passCount() const;
@@ -59,6 +61,9 @@ private:
     
     // The pass that is currently in progress, or -1.
     int currentPass_;
+    
+    // The number of samples that have been displayed in the ui
+    int totalSamples_;
     
     // The time that the current sample period started.
     // Sample periods last for FramesPerSample frames.
