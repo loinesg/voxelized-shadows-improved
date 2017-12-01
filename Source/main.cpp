@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
     QGLFormat format = QGLFormat::defaultFormat();
     format.setVersion(4, 0);
     format.setProfile(QGLFormat::CoreProfile);
+    format.setSwapInterval(0);
     
     // Create the window and controller
     bool fullScreen = flagSet("-fullscreen", argc, argv);

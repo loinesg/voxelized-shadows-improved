@@ -3,6 +3,7 @@
 MainWindowController::MainWindowController(MainWindow* window)
     : window_(window),
     inputManager_(),
+    performanceTest_(window->rendererWidget()),
     mouseDragging_(false),
     mousePosition_(Vector2(0, 0))
 {
@@ -41,6 +42,9 @@ MainWindowController::MainWindowController(MainWindow* window)
     {
         connect(window_->voxelPCFFilterSizeRadios()[i], SIGNAL(toggled(bool)), SLOT(voxelPCFFilterSizeToggled()));
     }
+    
+    // Start the performance test
+    performanceTest_.startTest();
 }
 
 bool MainWindowController::eventFilter(QObject* obj, QEvent* event)
@@ -146,8 +150,14 @@ void MainWindowController::voxelPCFFilterSizeToggled()
 
 void MainWindowController::update(float deltaTime)
 {
+    // Update performance tests
+    performanceTest_.update();
+    
     // Move the camera with user input
-    applyCameraMovement(deltaTime);
+    if(performanceTest_.isRunning() == false)
+    {
+        applyCameraMovement(deltaTime);
+    }
     
     // Update the statistics ui
     updateStatsUI();
@@ -179,8 +189,6 @@ void MainWindowController::updateStatsUI()
     const RendererStats* stats = window_->rendererWidget()->stats();
     int frameRate = stats->currentFrameRate();
     int frameTime = stats->currentFrameTime();
-    double shadowRenderingTime = stats->currentShadowRenderingTime();
-    double shadowSamplingTime = stats->currentShadowSamplingTime();
     
     // Get the voxel tree stats
     const VoxelTree* tree = window_->rendererWidget()->voxelTree();
@@ -193,8 +201,6 @@ void MainWindowController::updateStatsUI()
     // Create the text for each label
     QString resolutionText = QString("%1 x %2").arg(resX).arg(resY);
     QString frameRateText = QString("Frame Rate: %1 FPS (%2 ms)").arg(frameRate).arg(frameTime);
-    QString shadowRenderingText = QString("Shadow Rendering: %1 ms").arg(shadowRenderingTime, 0, 'f', 1);
-    QString shadowSamplingText = QString("Shadow Sampling: %1 ms").arg(shadowSamplingTime, 0, 'f', 1);
     QString treeResolutionText = QString("Resolution: %1K x %1K").arg(resolution);
     QString tilesText = QString("Tiles: %1 / %2").arg(completedTiles).arg(totalTiles);
     QString originalSizeText = QString("Original Size: %1 MB").arg(originalSizeMB);
@@ -203,12 +209,24 @@ void MainWindowController::updateStatsUI()
     // Update the stats labels
     window_->resolutionLabel()->setText(resolutionText);
     window_->frameRateLabel()->setText(frameRateText);
-    window_->shadowRenderingTimeLabel()->setText(shadowRenderingText);
-    window_->shadowSamplingTimeLabel()->setText(shadowSamplingText);
     window_->treeResolutionLabel()->setText(treeResolutionText);
     window_->treeTilesLabel()->setText(tilesText);
     window_->originalSizeLabel()->setText(originalSizeText);
     window_->treeSizeLabel()->setText(treeSizeText);
+    
+    // Update the pass rendering time labels
+    for(int pass = 0; pass < stats->passCount(); ++pass)
+    {
+        // Get the text for the label
+        const char* passName = stats->passName(pass).c_str();
+        const double passTime = stats->passAverageTime(pass);
+        const QString text = QString("Pass %1: %2 ms")
+            .arg(passName)
+            .arg(passTime, 2, 'g', 2);
+        
+        // Update the label
+        window_->passRenderingTimeLabels()[pass]->setText(text);
+    }
 }
 
 void MainWindowController::mousePressEvent(QMouseEvent* event)

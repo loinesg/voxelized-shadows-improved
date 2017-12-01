@@ -29,8 +29,11 @@ MainWindow::MainWindow(bool fullScreen, const QGLFormat &format, int voxelResolu
     // Create stats widgets
     resolutionLabel_ = createStatsLabel();
     frameRateLabel_ = createStatsLabel();
-    shadowRenderingTimeLabel_ = createStatsLabel();
-    shadowSamplingTimeLabel_ = createStatsLabel();
+    passRenderingTimeLabels_ = new QLabel*[4];
+    passRenderingTimeLabels_[0] = createStatsLabel();
+    passRenderingTimeLabels_[1] = createStatsLabel();
+    passRenderingTimeLabels_[2] = createStatsLabel();
+    passRenderingTimeLabels_[3] = createStatsLabel();
     treeResolutionLabel_ = createStatsLabel();
     treeTilesLabel_ = createStatsLabel();
     originalSizeLabel_ = createStatsLabel();
