@@ -96,6 +96,10 @@ void RendererWidget::initializeGL()
     
     // Create the stats manager
     stats_ = new RendererStats();
+    stats_->addPass("Shadow Map");
+    stats_->addPass("Scene Depth");
+    stats_->addPass("Shadow Mask");
+    stats_->addPass("Forward");
     
     // Create uniform buffers
     uniformManager_ = new UniformManager();
@@ -153,24 +157,24 @@ void RendererWidget::paintGL()
     data.lightDirection = -1.0 * scene_->mainLight()->forward();
     uniformManager_->updateSceneBuffer(data);
     
-    // Render shadow depth to the shadow map framebuffer.
-    stats_->shadowRenderingStarted();
-    renderShadowMap();
-    stats_->shadowRenderingFinished();
-    
     // Update construction of the voxel tree
     voxelTree_->updateBuild();
     
+    // Render shadow depth to the shadow map framebuffer.
+    stats_->passStarted(0);
+    renderShadowMap();
+    
     // Render scene depth to the main framebuffer.
+    stats_->passStarted(1);
     renderSceneDepth();
     
     // Render the screen space shadow mask
     // using the shadow map and scene depth.
-    stats_->shadowSamplingStarted();
+    stats_->passStarted(2);
     renderShadowMask();
-    stats_->shadowSamplingFinished();
     
     // Final forward pass.
+    stats_->passStarted(3);
     renderForward();
     
     // Draw debug overlay
@@ -178,6 +182,9 @@ void RendererWidget::paintGL()
     {
         overlays_[currentOverlay_]->draw(camera());
     }
+    
+    // Inform render stats that we are done
+    stats_->frameFinished();
     
     // Schedule a redraw immediately
     update();

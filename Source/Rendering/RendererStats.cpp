@@ -1,89 +1,135 @@
 #include "RendererStats.hpp"
 
 RendererStats::RendererStats()
-    : timer_(),
+    : frameTimer_(),
+    passStats_(),
+    currentPass_(-1),
+    samplePeriodStart_(0),
+    sampleFrameCount_(0),
     avgFrameRate_(-1),
-    avgFrameTime_(-1),
-    avgShadowRenderingTime_(-1),
-    avgShadowSamplingTime_(-1),
-    samplesCount_(0),
-    sampleStartTime_(0),
-    shadowRenderingTime_(0),
-    shadowSamplingTime_(0)
+    avgFrameTime_(-1)
 {
-    // Start the frame time timer
-    timer_.start();
+    // Start the frame time timers
+    frameTimer_.start();
     
     // Enable support for opengl 3.3 features
     initializeOpenGLFunctions();
-    
-    // Create the query objects
-    glGenQueries(4, queries_);
 }
 
 RendererStats::~RendererStats()
 {
-    glDeleteQueries(4, queries_);
+    // Delete all created gl queries
+    for(auto pass = passStats_.begin(); pass != passStats_.end(); ++pass)
+    {
+        glDeleteQueries(1, &pass->query);
+    }
+}
+
+int RendererStats::passCount() const
+{
+    return (int)passStats_.size();
+}
+
+const std::string& RendererStats::passName(int pass) const
+{
+    return passStats_[pass].name;
+}
+
+double RendererStats::passAverageTime(int pass) const
+{
+    return passStats_[pass].averageTime;
+}
+
+void RendererStats::addPass(const std::string &name)
+{
+    // Create the new pass
+    RenderPassStats pass;
+    pass.name = name;
+    
+    // Create a query object to measure gpu time
+    glGenQueries(1, &pass.query);
+    
+    // Add the pass to the passes list
+    passStats_.push_back(pass);
 }
 
 void RendererStats::frameStarted()
 {
-    // Add to the frame count
-    samplesCount_ ++;
-    
-    // Get the times from the previous frame
-    uint64_t renderingStart, renderingEnd, samplingStart, samplingEnd;
-    glGetQueryObjectui64v(queries_[0], GL_QUERY_RESULT, &renderingStart);
-    glGetQueryObjectui64v(queries_[1], GL_QUERY_RESULT, &renderingEnd);
-    glGetQueryObjectui64v(queries_[2], GL_QUERY_RESULT, &samplingStart);
-    glGetQueryObjectui64v(queries_[3], GL_QUERY_RESULT, &samplingEnd);
-    
-    // Add the rendering / sampling times to the total
-    shadowRenderingTime_ += (renderingEnd - renderingStart);
-    shadowSamplingTime_ += (samplingEnd - samplingStart);
-    
-    // Check if enough frames have been recorded to create new averages
-    if(samplesCount_ > 200)
+    // If a frame has been recorded, read back the pass start and end times
+    if(sampleFrameCount_ > 0)
     {
-        // Create the new averages
-        quint64 time = timer_.elapsed() - sampleStartTime_;
-        avgFrameRate_ = samplesCount_ / (time / 1000.0);
-        avgFrameTime_ = time / (double)samplesCount_;
-        avgShadowRenderingTime_ = shadowRenderingTime_ / (double)samplesCount_;
-        avgShadowSamplingTime_ = shadowSamplingTime_ / (double)samplesCount_;
+        for(auto pass = passStats_.begin(); pass != passStats_.end(); ++pass)
+        {
+            // Get the start and end times of the pass
+            GLint64 elapsed;
+            glGetQueryObjecti64v(pass->query, GL_QUERY_RESULT, &elapsed);
+            
+            // Convert the elapsed time from nanoseconds to milliseconds
+            double elapsedMS = elapsed / (double)1000000.0;
+            
+            // Add to the pass time
+            pass->sampleCurrentTime += elapsedMS;
+        }
+    }
+    
+    // If a sample period has just finished, record the results
+    if(sampleFrameCount_ == FramesPerSample)
+    {
+        // Measure the sample time difference
+        qint64 samplePeriodEnd = frameTimer_.elapsed();
+        qint64 samplePeriodDuration = (samplePeriodEnd - samplePeriodStart_);
         
-        // The rendering and sampling times are in nanoseconds
-        avgShadowRenderingTime_ /= 1000000.0;
-        avgShadowSamplingTime_ /= 1000000.0;
+        // Store the sample frame rate and frame time
+        avgFrameTime_ = samplePeriodDuration / (double)FramesPerSample;
+        avgFrameRate_ = 1000.0 / (double)avgFrameTime_;
         
-        // Reset the samples
-        samplesCount_ = 0;
-        sampleStartTime_ = timer_.elapsed();
-        shadowRenderingTime_ = 0;
-        shadowSamplingTime_ = 0;
+        // Compute the average time for each pass
+        for(auto pass = passStats_.begin(); pass != passStats_.end(); ++pass)
+        {
+            pass->averageTime = pass->sampleCurrentTime / (double)FramesPerSample;
+            pass->sampleCurrentTime = 0.0;
+        }
+        
+        // Reset the samples count
+        sampleFrameCount_ = 0;
+    }
+    
+    // If a new sample period has just started, record the start time
+    if(sampleFrameCount_ == 0)
+    {
+        samplePeriodStart_ = frameTimer_.elapsed();
     }
 }
 
-void RendererStats::shadowRenderingStarted()
+void RendererStats::frameFinished()
 {
-    // Request the GPU timestamp at this point
-    glQueryCounter(queries_[0], GL_TIMESTAMP);
+    // End any pass that is in progress
+    passFinished();
+    
+    // Increment the sample count
+    sampleFrameCount_ ++;
 }
 
-void RendererStats::shadowRenderingFinished()
+void RendererStats::passStarted(int passIndex)
 {
-    // Request the GPU timestamp at this point
-    glQueryCounter(queries_[1], GL_TIMESTAMP);
+    // End any pass that is in progress
+    passFinished();
+    
+    // Record the pass that has now started
+    currentPass_ = passIndex;
+    
+    // Kick off the gpu timer
+    glBeginQuery(GL_TIME_ELAPSED, passStats_[currentPass_].query);
 }
 
-void RendererStats::shadowSamplingStarted()
+void RendererStats::passFinished()
 {
-    // Request the GPU timestamp at this point
-    glQueryCounter(queries_[2], GL_TIMESTAMP);
-}
-
-void RendererStats::shadowSamplingFinished()
-{
-    // Request the GPU timestamp at this point
-    glQueryCounter(queries_[3], GL_TIMESTAMP);
+    // Check that a pass was actually in progress
+    if(currentPass_ == -1)
+    {
+        return;
+    }
+    
+    // Stop the gpu timer
+    glEndQuery(GL_TIME_ELAPSED);
 }

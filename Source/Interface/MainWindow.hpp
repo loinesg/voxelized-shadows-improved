@@ -21,8 +21,7 @@ public:
     // Stats widgets
     QLabel* resolutionLabel() const { return resolutionLabel_; }
     QLabel* frameRateLabel() const { return frameRateLabel_; }
-    QLabel* shadowRenderingTimeLabel() const { return shadowRenderingTimeLabel_; }
-    QLabel* shadowSamplingTimeLabel() const { return shadowSamplingTimeLabel_; }
+    QLabel** passRenderingTimeLabels() const { return passRenderingTimeLabels_; }
     QLabel* treeResolutionLabel() const { return treeResolutionLabel_; }
     QLabel* treeTilesLabel() const { return treeTilesLabel_; }
     QLabel* originalSizeLabel() const { return originalSizeLabel_; }
@@ -48,8 +47,7 @@ private:
     QGroupBox* statsGroupBox_;
     QLabel* resolutionLabel_;
     QLabel* frameRateLabel_;
-    QLabel* shadowRenderingTimeLabel_;
-    QLabel* shadowSamplingTimeLabel_;
+    QLabel** passRenderingTimeLabels_;
     QLabel* treeResolutionLabel_;
     QLabel* treeTilesLabel_;
     QLabel* originalSizeLabel_;
