@@ -14,10 +14,10 @@ UniformManager::~UniformManager()
     glDeleteBuffers(1, &voxelBlockID_);
 }
 
-void UniformManager::updatePerObjectBuffer(const PerObjectUniformBuffer &buffer)
+void UniformManager::updatePerObjectBuffer(const PerObjectUniformBuffer &buffer, int instanceCount)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, perObjectBlockID_);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(PerObjectUniformBuffer), &buffer, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * instanceCount, &buffer, GL_DYNAMIC_DRAW);
 }
 
 void UniformManager::updateSceneBuffer(const SceneUniformBuffer &buffer)

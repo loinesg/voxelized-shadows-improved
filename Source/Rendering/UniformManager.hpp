@@ -84,7 +84,7 @@ public:
     UniformManager();
     ~UniformManager();
     
-    void updatePerObjectBuffer(const PerObjectUniformBuffer &buffer);
+    void updatePerObjectBuffer(const PerObjectUniformBuffer &buffer, int instanceCount);
     void updateSceneBuffer(const SceneUniformBuffer &buffer);
     void updateCameraBuffer(const CameraUniformBuffer &buffer);
     void updateShadowBuffer(const ShadowUniformBuffer &buffer);

@@ -91,7 +91,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
             // Send the queued instances
             if(instanceCount > 0)
             {
-                uniformManager_->updatePerObjectBuffer(instanceData);
+                uniformManager_->updatePerObjectBuffer(instanceData, instanceCount);
                 glDrawElementsInstanced(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, (void*)0, instanceCount);
                 instanceCount = 0;
             }
@@ -99,7 +99,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
             // Bind the correct shader
             if(shaderFeatures != prevShaderFeatures)
                 shaderCollection_->bindVariant(shaderFeatures);
-            
+                
             // Bind the correct main texture
             if(texture != prevTexture)
                 texture->bind(GL_TEXTURE0);
@@ -126,7 +126,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
     // Send any remaining queued instances
     if(instanceCount > 0)
     {
-        uniformManager_->updatePerObjectBuffer(instanceData);
+        uniformManager_->updatePerObjectBuffer(instanceData, instanceCount);
         glDrawElementsInstanced(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, (void*)0, instanceCount);
     }
 }
