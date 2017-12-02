@@ -60,16 +60,12 @@ public:
     
     // Program and shader ids
     GLuint program() const { return program_; }
-    GLuint vertexShader() const { return vertexShader_; }
-    GLuint fragmentShader() const { return fragmentShader_; }
     
     void bind();
     
 private:
     ShaderFeatureList features_;
     GLuint program_;
-    GLuint vertexShader_;
-    GLuint fragmentShader_;
     GLint mainTextureLoc_;
     GLint normalMapTextureLoc_;
     GLint shadowMapTextureLoc_;

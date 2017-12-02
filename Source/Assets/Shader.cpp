@@ -14,21 +14,23 @@ Shader::Shader(const string &name, ShaderFeatureList features)
     string fragSource = SHADERS_DIRECTORY + name + ".frag.glsl";
     
     // Compile vertex shader
-    if(!compileShader(GL_VERTEX_SHADER, vertSource.c_str(), vertexShader_))
+    GLuint vertexShader;
+    if(!compileShader(GL_VERTEX_SHADER, vertSource.c_str(), vertexShader))
     {
         printf("Failed to compile vertex shader \n");
     }
     
     // Compile fragment shader
-    if(!compileShader(GL_FRAGMENT_SHADER, fragSource.c_str(), fragmentShader_))
+    GLuint fragementShader;
+    if(!compileShader(GL_FRAGMENT_SHADER, fragSource.c_str(), fragementShader))
     {
         printf("Failed to compile fragment shader \n");
     }
     
     // Create program
     program_ = glCreateProgram();
-    glAttachShader(program_, vertexShader_);
-    glAttachShader(program_, fragmentShader_);
+    glAttachShader(program_, vertexShader);
+    glAttachShader(program_, fragementShader);
     glLinkProgram(program_);
     
     // Check for linking errors
@@ -36,6 +38,10 @@ Shader::Shader(const string &name, ShaderFeatureList features)
     {
         printf("Failed to create program \n");
     }
+    
+    // The shader is now linked, so we dont need the compiled stages
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragementShader);
     
     // Set uniform block binding
     setUniformBlockBinding("per_object_data", PerObjectUniformBuffer::BlockID);
@@ -55,8 +61,6 @@ Shader::Shader(const string &name, ShaderFeatureList features)
 Shader::~Shader()
 {
     glDeleteProgram(program_);
-    glDeleteShader(vertexShader_);
-    glDeleteShader(fragmentShader_);
 }
 
 bool Shader::hasFeature(ShaderFeature feature) const
