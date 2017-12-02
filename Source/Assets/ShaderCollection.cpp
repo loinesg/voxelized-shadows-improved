@@ -9,14 +9,6 @@ ShaderCollection::ShaderCollection(const string &name)
     
 }
 
-ShaderCollection::~ShaderCollection()
-{
-    for(unsigned int i = 0; i < shaderVariants_.size(); ++i)
-    {
-        delete shaderVariants_[i];
-    }
-}
-
 ShaderFeatureList ShaderCollection::enabledFeatures() const
 {
     // Only include features that are both enabled and supported
@@ -38,42 +30,23 @@ void ShaderCollection::setSupportedFeatures(ShaderFeatureList supportedFeatures)
     supportedFeatures_ = supportedFeatures;
 }
 
-Shader* ShaderCollection::getVariant(ShaderFeatureList features)
+void ShaderCollection::bindVariant(ShaderFeatureList features)
 {
     // Only use features that are enabled and supported.
     features &= (enabledFeatures_ & supportedFeatures_);
     
     // Try to find a cached shader.
-    Shader* existing = findShader(features);
-    if(existing != NULL)
-    {
-        return existing;
-    }
-    
-    // No cached shader. Create a new shader.
-    return createShader(features);
-}
-
-Shader* ShaderCollection::findShader(ShaderFeatureList features) const
-{
     for(unsigned int i = 0; i < shaderVariants_.size(); ++i)
     {
-        Shader* shader = shaderVariants_[i];
-        
-        if(shader->features() == features)
+        Shader& shader = shaderVariants_[i];
+        if(shader.features() == features)
         {
-            return shader;
+            shader.bind();
+            return;
         }
     }
-    
-    // No shader exists.
-    return NULL;
-}
 
-Shader* ShaderCollection::createShader(ShaderFeatureList features)
-{
-    Shader* shader = new Shader(shaderName_, features);
-    shaderVariants_.push_back(shader);
-    
-    return shader;
+    // No cached shader. Create a new shader.
+    shaderVariants_.push_back(Shader(shaderName_, features));
+    shaderVariants_.back().bind();
 }

@@ -60,7 +60,37 @@ Shader::Shader(const string &name, ShaderFeatureList features)
 
 Shader::~Shader()
 {
-    glDeleteProgram(program_);
+    if(program_ > 0)
+    {
+        glDeleteProgram(program_);
+    }
+}
+
+Shader::Shader(Shader &&other)
+{
+    // Steal the contents of other
+    features_ = other.features_;
+    program_ = other.program_;
+    
+    // Reset other
+    other.features_ = 0;
+    other.program_ = 0;
+}
+
+Shader& Shader::operator=(Shader &&other)
+{
+    if(this != &other)
+    {
+        // Steal the contents of other
+        features_ = other.features_;
+        program_ = other.program_;
+        
+        // Reset other
+        other.features_ = 0;
+        other.program_ = 0;
+    }
+    
+    return *this;
 }
 
 bool Shader::hasFeature(ShaderFeature feature) const

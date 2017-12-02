@@ -100,7 +100,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance*>* instances, 
             
             // Bind the correct shader
             if(shaderFeatures != prevShaderFeatures)
-                shaderCollection_->getVariant(shaderFeatures)->bind();
+                shaderCollection_->bindVariant(shaderFeatures);
             
             // Bind the correct main texture
             if(texture != prevTexture)
@@ -136,7 +136,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance*>* instances, 
 void RenderPass::renderFullScreen()
 {
     // Use all supported shader features
-    shaderCollection_->getVariant(~0)->bind();
+    shaderCollection_->bindVariant(~0);
     
     // Use the quad mesh
     fullScreenQuad_->bind();

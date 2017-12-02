@@ -54,6 +54,14 @@ public:
     Shader(const string &name, ShaderFeatureList features);
     ~Shader();
     
+    // Prevent shaders from being copied
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+    
+    // Allow a shader to be moved
+    Shader(Shader&& other);
+    Shader& operator=(Shader&& other);
+    
     // Feature management
     ShaderFeatureList features() const { return features_; }
     bool hasFeature(ShaderFeature feature) const;
