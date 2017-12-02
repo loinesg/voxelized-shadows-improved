@@ -66,11 +66,6 @@ public:
 private:
     ShaderFeatureList features_;
     GLuint program_;
-    GLint mainTextureLoc_;
-    GLint normalMapTextureLoc_;
-    GLint shadowMapTextureLoc_;
-    GLint shadowMaskTextureLoc_;
-    GLint voxelDataTextureLoc_;
     
     // Shader compilation
     bool compileShader(GLenum type, const char* file, GLuint &id);
@@ -79,6 +74,9 @@ private:
     
     // Sets a uniform block binding
     void setUniformBlockBinding(const char* blockName, GLuint id);
+    
+    // Sets the texture id for the named texture
+    void setTextureBinding(const char* textureName, GLint id);
     
     // Creates a #define list for the enabled features
     string createFeatureDefines() const;

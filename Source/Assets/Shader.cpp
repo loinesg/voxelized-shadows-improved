@@ -51,11 +51,11 @@ Shader::Shader(const string &name, ShaderFeatureList features)
     setUniformBlockBinding("voxel_data", VoxelsUniformBuffer::BlockID);
     
     // Store texture locations
-    mainTextureLoc_ = glGetUniformLocation(program_, "_MainTexture");
-    normalMapTextureLoc_ = glGetUniformLocation(program_, "_NormalMap");
-    shadowMapTextureLoc_ = glGetUniformLocation(program_, "_ShadowMapTexture");
-    shadowMaskTextureLoc_ = glGetUniformLocation(program_, "_ShadowMask");
-    voxelDataTextureLoc_ = glGetUniformLocation(program_, "_VoxelData");
+    setTextureBinding("_MainTexture", 0);
+    setTextureBinding("_NormalMap", 1);
+    setTextureBinding("_ShadowMapTexture", 2);
+    setTextureBinding("_ShadowMask", 3);
+    setTextureBinding("_VoxelData", 4);
 }
 
 Shader::~Shader()
@@ -71,13 +71,6 @@ bool Shader::hasFeature(ShaderFeature feature) const
 void Shader::bind()
 {
     glUseProgram(program_);
-    
-    // Set texture locations
-    glUniform1i(mainTextureLoc_, 0);
-    glUniform1i(normalMapTextureLoc_, 1);
-    glUniform1i(shadowMapTextureLoc_, 2);
-    glUniform1i(shadowMaskTextureLoc_, 3);
-    glUniform1i(voxelDataTextureLoc_, 4);
 }
 
 bool Shader::compileShader(GLenum type, const char* fileName, GLuint &id)
@@ -168,6 +161,16 @@ void Shader::setUniformBlockBinding(const char *blockName, GLuint id)
     if(blockIndex != GL_INVALID_INDEX)
     {
         glUniformBlockBinding(program_, blockIndex, id);
+    }
+}
+
+void Shader::setTextureBinding(const char *textureName, GLint id)
+{
+    const GLuint location = glGetUniformLocation(program_, textureName);
+    if(location != GL_INVALID_INDEX)
+    {
+        glUseProgram(program_);
+        glUniform1i(location, id);
     }
 }
 
