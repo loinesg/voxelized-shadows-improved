@@ -18,7 +18,6 @@ class Scene
 {
 public:
     Scene();
-    ~Scene();
     
     // The viewers camera
     const Camera* mainCamera() const { return &cameras_[0]; }
@@ -28,7 +27,7 @@ public:
     const Light* mainLight() const { return &lights_[0]; }
     
     // The mesh instances to be rendered
-    const vector<MeshInstance*>* meshInstances() const { return &meshInstances_; }
+    const vector<MeshInstance>& meshInstances() const { return meshInstances_; }
     
     void update(float deltaTime);
     
@@ -40,8 +39,8 @@ private:
     // Scene objects
     vector<Camera> cameras_;
     vector<Light> lights_;
-    vector<MeshInstance*> meshInstances_;
-    vector<Animation*> animations_;
+    vector<MeshInstance> meshInstances_;
+    vector<Animation> animations_;
     
     // Assets
     map<string, Mesh*> meshes_;

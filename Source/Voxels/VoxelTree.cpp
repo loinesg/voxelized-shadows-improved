@@ -350,12 +350,9 @@ Bounds VoxelTree::computeSceneBoundsLightSpace() const
     Bounds bounds = Bounds(Vector3::zero(), Vector3::zero());
     
     // Expand the scene bounds to cover each mesh
-    const vector<MeshInstance*>* instances = scene_->meshInstances();
-    for(unsigned int i = 0; i < instances->size(); ++i)
+    const vector<MeshInstance> &instances = scene_->meshInstances();
+    for(auto instance = instances.begin(); instance != instances.end(); ++instance)
     {
-        // Get the mesh instance
-        MeshInstance* instance = (*instances)[i];
-        
         // Skip objects that are not static
         if(instance->isStatic() == false)
         {

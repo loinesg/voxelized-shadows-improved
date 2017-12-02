@@ -36,7 +36,7 @@ public:
     
     // Sends draw commands to the graphics API.
     // The meshes can be filtered based on their static flag state.
-    void submit(Camera* camera, const vector<MeshInstance*>* instances, bool drawStatic = true, bool drawDynamic = true);
+    void submit(Camera* camera, const vector<MeshInstance> &instances, bool drawStatic = true, bool drawDynamic = true);
     
     // Draws a full screen quad using all enabled shader features.
     void renderFullScreen();

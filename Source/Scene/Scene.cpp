@@ -12,22 +12,11 @@ Scene::Scene()
     meshes_(),
     textures_()
 {
-    
-}
-
-Scene::~Scene()
-{
-    // Delete all mesh instances
-    for(unsigned int i = 0; i < meshInstances_.size(); ++i)
-    {
-        delete meshInstances_[i];
-    }
-    
-    // Delete all animatiions
-    for(unsigned int i = 0; i < animations_.size(); ++i)
-    {
-        delete animations_[i];
-    }
+    // Preallocate enough space for all of the mesh instances
+    // and animations to ensure pointers to an instance are not
+    // broken due to vector resizing.
+    meshInstances_.reserve(512);
+    animations_.reserve(32);
 }
 
 void Scene::update(float deltaTime)
@@ -35,7 +24,7 @@ void Scene::update(float deltaTime)
     // Update all animations
     for(unsigned int i = 0; i < animations_.size(); ++i)
     {
-        animations_[i]->update(deltaTime);
+        animations_[i].update(deltaTime);
     }
 }
 
@@ -160,8 +149,8 @@ bool Scene::loadMeshInstance(ifstream &file)
     }
     
     // Create the instance
-    MeshInstance* instance = new MeshInstance(mesh, shaderFeatures, texture, normalMap);
-    loadObjectTransform(file, instance);
+    MeshInstance instance(mesh, shaderFeatures, texture, normalMap);
+    loadObjectTransform(file, &instance);
     meshInstances_.push_back(instance);
     return true;
 }
@@ -178,10 +167,10 @@ bool Scene::loadAnimation(ifstream &file)
     // The animation component affects the mesh instance
     // most recently found in the file
     assert(!meshInstances_.empty());
-    MeshInstance* meshInstance = meshInstances_.back();
+    MeshInstance* meshInstance = &meshInstances_.back();
     
     // Create the animation instance
-    animations_.push_back(new Animation(meshInstance, startTime, resetInterval,  rotationSpeed, translationSpeed));
+    animations_.push_back(Animation(meshInstance, startTime, resetInterval,  rotationSpeed, translationSpeed));
     return true;
 }
 

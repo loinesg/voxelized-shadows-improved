@@ -41,7 +41,7 @@ void RenderPass::setSupportedFeatures(ShaderFeatureList supportedFeatures)
     shaderCollection_->setSupportedFeatures(supportedFeatures);
 }
 
-void RenderPass::submit(Camera* camera, const vector<MeshInstance*>* instances, bool drawStatic, bool drawDynamic)
+void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, bool drawStatic, bool drawDynamic)
 {
     // Setup the camera uniform buffer
     CameraUniformBuffer cub;
@@ -67,10 +67,8 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance*>* instances, 
     int instanceCount = 0;
     
     ShaderFeatureList enabledFeatures = shaderCollection_->enabledFeatures();
-    for(unsigned int i = 0; i < instances->size(); ++i)
+    for(auto instance = instances.begin(); instance != instances.end(); instance++)
     {
-        MeshInstance* instance = (*instances)[i];
-        
         // Check if the instance should be skipped due to its static flag
         if((instance->isStatic() && !drawStatic)
            || (!instance->isStatic() && !drawDynamic))
