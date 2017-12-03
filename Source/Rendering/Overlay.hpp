@@ -10,6 +10,7 @@ using namespace std;
 #include "Shader.hpp"
 #include "Mesh.hpp"
 #include "Camera.hpp"
+#include "Texture.hpp"
 
 class Overlay
 {
@@ -36,7 +37,6 @@ public:
 private:
     string name_;
     Shader* shader_;
-    Mesh* mesh_;
     Texture* texture_;
     bool fullScreen_;
     bool useBlending_;

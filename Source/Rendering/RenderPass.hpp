@@ -47,5 +47,4 @@ private:
     PassClearColor clearColor_;
     ShaderCollection* shaderCollection_;
     UniformManager* uniformManager_;
-    Mesh* fullScreenQuad_;
 };

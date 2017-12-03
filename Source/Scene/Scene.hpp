@@ -9,6 +9,7 @@ using namespace std;
 
 #include "Camera.hpp"
 #include "Light.hpp"
+#include "MeshCollection.hpp"
 #include "MeshInstance.hpp"
 #include "Object.hpp"
 #include "Texture.hpp"
@@ -53,6 +54,9 @@ private:
     bool loadLight(ifstream &file);
     bool loadMeshInstance(ifstream &file);
     bool loadAnimation(ifstream &file);
+    
+    // Used to store meshes before they are sent to the gpu
+    MeshCollection meshCollection_;
     
     // Asset loading
     Mesh* getMesh(const string &name);

@@ -1,5 +1,7 @@
 #include "RenderPass.hpp"
 
+#include "MeshCollection.hpp"
+
 RenderPass::RenderPass(const string &name, UniformManager* uniformManager)
     : name_(name),
     clearFlags_(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT),
@@ -7,13 +9,12 @@ RenderPass::RenderPass(const string &name, UniformManager* uniformManager)
     shaderCollection_(new ShaderCollection(name)),
     uniformManager_(uniformManager)
 {
-    fullScreenQuad_ = Mesh::fullScreenQuad();
+    
 }
 
 RenderPass::~RenderPass()
 {
     delete shaderCollection_;
-    delete fullScreenQuad_;
 }
 
 void RenderPass::setClearFlags(PassClearFlags clearFlags)
@@ -52,8 +53,11 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
     uniformManager_->updateCameraBuffer(cub);
     
     // Clear the screen
-    glClearColor(clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w);
-    glClear(clearFlags_);
+    if(clearFlags_ > 0)
+    {
+        glClearColor(clearColor_.x, clearColor_.y, clearColor_.z, clearColor_.w);
+        glClear(clearFlags_);
+    }
     
     // Remember the previously used state
     // Used to skip needless state changes
@@ -92,7 +96,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
             if(instanceCount > 0)
             {
                 uniformManager_->updatePerObjectBuffer(instanceData, instanceCount);
-                glDrawElementsInstanced(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, (void*)0, instanceCount);
+                glDrawElementsInstancedBaseVertex(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, prevMesh->elementsOffset(), instanceCount, prevMesh->baseVertex());
                 instanceCount = 0;
             }
             
@@ -107,10 +111,6 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
             // Bind the correct normal map texture
             if(normalMap != prevNormalMap)
                 normalMap->bind(GL_TEXTURE1);
-                
-            // Bind the correct mesh
-            if(mesh != prevMesh)
-                mesh->bind();
         }
         
         // Add this mesh to the queue
@@ -127,7 +127,7 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
     if(instanceCount > 0)
     {
         uniformManager_->updatePerObjectBuffer(instanceData, instanceCount);
-        glDrawElementsInstanced(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, (void*)0, instanceCount);
+        glDrawElementsInstancedBaseVertex(GL_TRIANGLES, prevMesh->elementsCount(), GL_UNSIGNED_SHORT, prevMesh->elementsOffset(), instanceCount, prevMesh->baseVertex());
     }
 }
 
@@ -136,9 +136,9 @@ void RenderPass::renderFullScreen()
     // Use all supported shader features
     shaderCollection_->bindVariant(~0);
     
-    // Use the quad mesh
-    fullScreenQuad_->bind();
-
+    // Use a full screen quad
+    const Mesh* mesh = MeshCollection::fullScreenQuad();
+    
     // Draw the quad
-    glDrawElements(GL_TRIANGLES, fullScreenQuad_->elementsCount(), GL_UNSIGNED_SHORT, (void*)0);
+    glDrawElementsBaseVertex(GL_TRIANGLES, mesh->elementsCount(), GL_UNSIGNED_SHORT, mesh->elementsOffset(), mesh->baseVertex());
 }

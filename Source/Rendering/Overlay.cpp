@@ -1,18 +1,18 @@
 #include "Overlay.hpp"
 
+#include "MeshCollection.hpp"
+
 Overlay::Overlay(const string &name, const string &shaderName, ShaderFeatureList shaderFeatures)
     : name_(name),
     fullScreen_(true),
     useBlending_(false)
 {
     shader_ = new Shader(shaderName, shaderFeatures);
-    mesh_ = Mesh::fullScreenQuad();
 }
 
 Overlay::~Overlay()
 {
     delete shader_;
-    delete mesh_;
 }
 
 void Overlay::setFullScreen(bool fullscreen)
@@ -87,12 +87,12 @@ void Overlay::draw(const Camera* camera)
     }
     
     // Use quad mesh and overlay shader
-    mesh_->bind();
     shader_->bind();
     texture_->bind(GL_TEXTURE0);
     
     // Draw the quad mesh
-    glDrawElements(GL_TRIANGLES, mesh_->elementsCount(), GL_UNSIGNED_SHORT, (void*)0);
+    const Mesh* mesh = MeshCollection::fullScreenQuad();
+    glDrawElementsBaseVertex(GL_TRIANGLES, mesh->elementsCount(), GL_UNSIGNED_SHORT, mesh->elementsOffset(), mesh->baseVertex());
     
     // Clean up blending changes
     glDisable(GL_BLEND);

@@ -10,7 +10,8 @@ Scene::Scene()
     lights_(),
     meshInstances_(),
     meshes_(),
-    textures_()
+    textures_(),
+    meshCollection_()
 {
     // Preallocate enough space for all of the mesh instances
     // and animations to ensure pointers to an instance are not
@@ -47,6 +48,9 @@ bool Scene::loadFromFile(const string &fileName)
         printf("Failed to read scene file %s \n", fileName.c_str());
         return false;
     }
+    
+    // After all meshes are loaded, send the collection to the gpu
+    meshCollection_.upload();
     
     printf("Loaded scene %s successfully \n", fileName.c_str());
     return true;
@@ -185,7 +189,7 @@ Mesh* Scene::getMesh(const string &name)
     
     // Load the mesh.
     string fullPath = MESHES_DIRECTORY + name;
-    Mesh* mesh = Mesh::load(fullPath.c_str());
+    Mesh* mesh = meshCollection_.load(fullPath.c_str());
     meshes_.insert(pair<string, Mesh*>(name, mesh));
     return mesh;
 }
