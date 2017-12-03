@@ -101,6 +101,9 @@ void RendererStats::frameStarted()
     {
         samplePeriodStart_ = frameTimer_.elapsed();
     }
+    
+    // Reset the pass count
+    currentPass_ = -1;
 }
 
 void RendererStats::frameFinished()
