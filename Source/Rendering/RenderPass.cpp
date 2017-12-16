@@ -105,11 +105,13 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
                 shaderCollection_->bindVariant(shaderFeatures);
                 
             // Bind the correct main texture
-            if(texture != prevTexture)
+            if(texture != prevTexture
+               && (shaderFeatures & (SF_Texture | SF_Cutout)) != 0)
                 texture->bind(GL_TEXTURE0);
             
             // Bind the correct normal map texture
-            if(normalMap != prevNormalMap)
+            if(normalMap != prevNormalMap
+               && (shaderFeatures & SF_NormalMap) != 0)
                 normalMap->bind(GL_TEXTURE1);
         }
         
