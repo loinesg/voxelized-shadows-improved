@@ -38,6 +38,12 @@ void main()
     // Retrieve screen coordinate and depth.
     float depth = texture(_MainTexture, texcoord).r;
 
+    // Exit early if the depth is the skybox depth
+    if(depth == 1.0)
+    {
+        discard;
+    }
+    
     // Compute the world position.
     vec4 clipPos = vec4(texcoord.xy, depth, 1.0);
     vec4 worldPos = _ClipToWorld * clipPos;
