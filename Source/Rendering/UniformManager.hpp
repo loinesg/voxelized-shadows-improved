@@ -77,8 +77,8 @@ struct VoxelsUniformBuffer
     {
         uint32_t xOffset;
         uint32_t yOffset;
-        uint32_t bitmaskHigh;
         uint32_t bitmaskLow;
+        uint32_t bitmaskHigh;
     };
     
     // The precomputed information for each PCF lookup

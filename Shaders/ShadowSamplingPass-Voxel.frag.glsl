@@ -180,8 +180,8 @@ VoxelQuery sampleShadowTree(uvec3 coord)
     
     // Get the shadowing state of the voxel
     uint shadowing = leafIndex > 31u
-        ? (leaf.bits.x >> (leafIndex-32u)) & 1u
-        : (leaf.bits.y >> leafIndex) & 1u;
+        ? (leaf.bits.y >> (leafIndex-32u)) & 1u
+        : (leaf.bits.x >> leafIndex) & 1u;
     
     // Return the query result
     VoxelQuery q;
