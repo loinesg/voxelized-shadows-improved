@@ -9,8 +9,11 @@ layout(std140) uniform camera_data
 {
     uniform vec2 _ScreenResolution;
     uniform vec3 _CameraPosition;
+    uniform mat4x4 _WorldToView;
     uniform mat4x4 _ViewProjectionMatrix;
     uniform mat4x4 _ClipToWorld;
+    uniform vec4 _FrustumCorners[4];
+    uniform vec2 _CameraClipPlanes; // x = near, y = far
 };
 
 // voxel_data uniform buffer
@@ -38,6 +41,7 @@ uniform sampler2D _MainTexture;
 // Voxelized Shadow Map data
 uniform usamplerBuffer _VoxelData;
 
+in vec3 viewDir;
 in vec2 texcoord;
 
 // Output color
@@ -227,19 +231,18 @@ VoxelQuery sampleShadowTree(uvec3 coord)
 
 void main()
 {
-    // Retrieve screen coordinate and depth.
-    float depth = texture(_MainTexture, texcoord).r;
+    // Retrieve screen coordinate and linear depth.
+    float linearDepth = texture(_MainTexture, texcoord).r;
     
     // Exit early if the depth is the skybox depth
-    if(depth == 1.0)
+    if(linearDepth == 1.0)
     {
         discard;
     }
     
-    // Compute the world position.
-    vec4 clipPos = vec4(texcoord.xy, depth, 1.0);
-    vec4 worldPos = _ClipToWorld * clipPos;
-    worldPos /= worldPos.w;
+    // Compute the world position using the camera pos, normalized
+    // view dir from vertex shader and linear depth using 1 madd
+    vec4 worldPos = vec4(viewDir * linearDepth + _CameraPosition, 1.0);
     
     // Get the coordinate for the voxel tree
     uvec3 voxelCoord = getVoxelCoord(worldPos);
@@ -248,9 +251,6 @@ void main()
     VoxelQuery result = sampleShadowTree(voxelCoord);
     
 #ifdef DEBUG_SHOW_VOXEL_TREE_DEPTH
-    
-    // Discard samples that are at maximum depth (sky)
-    if(depth == 1.0) discard;
     
     // Discard overlay samples on the left half of the screen
     if(texcoord.x < 0.5) discard;

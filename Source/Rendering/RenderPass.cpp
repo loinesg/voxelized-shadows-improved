@@ -48,8 +48,26 @@ void RenderPass::submit(Camera* camera, const vector<MeshInstance> &instances, b
     CameraUniformBuffer cub;
     cub.screenResolution = Vector4(camera->pixelWidth(), camera->pixelHeight(), 0.0, 0.0);
     cub.cameraPosition = Vector4(camera->position(), 1.0);
+    cub.worldToView = camera->worldToLocal();
     cub.viewProjection = camera->worldToCameraMatrix();
     cub.clipToWorld = camera->cameraToWorldMatrix();
+    
+    // If we are in perspective mode, also set up the frustum corners
+    if(camera->type() == CameraType::Perspective)
+    {
+        camera->getFrustumCorners(camera->farPlane(), cub.frustumCorners);
+        
+        // Transform the results to a world space vector of length 1
+        for(int i = 0; i < 4; ++i)
+        {
+            cub.frustumCorners[i] = Vector4(camera->localToWorldVector(cub.frustumCorners[i].vec3()), 0.0f);
+        }
+        
+        // Specify the clip plane distances
+        cub.cameraClipPlanes.x = camera->nearPlane();
+        cub.cameraClipPlanes.y = camera->farPlane();
+    }
+    
     uniformManager_->updateCameraBuffer(cub);
     
     // Clear the screen

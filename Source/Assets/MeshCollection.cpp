@@ -175,10 +175,10 @@ void MeshCollection::addFullScreenQuad()
     std::vector<MeshElementIndex> elements;
     
     // 4 vertices are needed
-    positions.push_back(Vector3(-1.0, -1.0, 1.0));
-    positions.push_back(Vector3(1.0, -1.0, 1.0));
     positions.push_back(Vector3(1.0, 1.0, 1.0));
+    positions.push_back(Vector3(1.0, -1.0, 1.0));
     positions.push_back(Vector3(-1.0, 1.0, 1.0));
+    positions.push_back(Vector3(-1.0, -1.0, 1.0));
     
     for(int i = 0; i < 4; ++i)
     {
@@ -189,8 +189,8 @@ void MeshCollection::addFullScreenQuad()
     
     // First triangle (lower right)
     elements.push_back(0);
+    elements.push_back(3);
     elements.push_back(1);
-    elements.push_back(2);
     
     // Second triangle (upper left)
     elements.push_back(0);

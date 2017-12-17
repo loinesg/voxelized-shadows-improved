@@ -8,7 +8,7 @@ using namespace std;
 class Texture
 {
 public:
-    Texture(GLuint id, int width, int height, GLint internalFormat, GLenum format);
+    Texture(GLuint id, int width, int height, GLint internalFormat, GLenum format, GLenum type);
     ~Texture();
     
     GLuint id() const { return id_; }
@@ -39,6 +39,9 @@ public:
     // Creates a depth texture.
     static Texture* depth(int width, int height);
     
+    // Creates a texture for storing normalized linear depth
+    static Texture* linearDepth(int width, int height);
+    
     // Creates a texture with a single colour channel.
     static Texture* singleChannel(int width, int height);
     
@@ -48,4 +51,5 @@ private:
     int height_;
     GLint internalFormat_;
     GLenum format_;
+    GLenum type_;
 };

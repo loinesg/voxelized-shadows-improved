@@ -25,13 +25,20 @@ layout(location = 0) in vec4 _position;
     out vec2 texcoord;
 #endif
 
+out float linearDistance;
+
 void main()
 {
     mat4x4 _ModelToWorld = _ModelToWorldPerInstance[gl_InstanceID];
-    gl_Position = _ViewProjectionMatrix * (_ModelToWorld * _position);
+    vec4 worldSpacePos = (_ModelToWorld * _position);
+    gl_Position = _ViewProjectionMatrix * worldSpacePos;
     
 #ifdef ALPHA_TEST_ON
     // Texcoord only needed for alpha test texture lookups
     texcoord = _texcoord;
 #endif
+    
+    // Compute the linear distance to the camera.
+    // Normalize it so that 1 is on the far clip plane.
+    linearDistance = (_WorldToView * worldSpacePos).z / _CameraClipPlanes.y;
 }
