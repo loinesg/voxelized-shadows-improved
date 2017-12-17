@@ -207,7 +207,7 @@ VoxelQuery sampleShadowTree(uvec3 coord)
         uvec2 bitmask = lookup.zw;
         
         // Get the leaf coord
-        uvec3 pcfCoord = uvec3(coord.xy + offset - uvec2(20u), coord.z);
+        uvec3 pcfCoord = uvec3(coord.xy + offset, coord.z);
         
         // Query the shadow tree
         LeafNodeQuery leaf = getLeafNode(pcfCoord);
