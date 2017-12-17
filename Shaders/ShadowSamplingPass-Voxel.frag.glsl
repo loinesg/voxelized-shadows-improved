@@ -100,17 +100,15 @@ uint getChildIndex(uint depth, uvec3 coord)
  */
 int getChildPointerIndex(uint childMask, uint childIndex)
 {
-    int ptr = 0;
+    // The uniform / mixed flag is in the second bit for each
+    // child info 2-bit value
+    uint mixedFlagBits = 43690u; // binary 10 10 10 10 10 10 10 10
     
-    for(uint i = 0u; i < childIndex; ++i)
-    {
-        if(((childMask >> (i * 2u)) & 3u) > 1u)
-        {
-            ptr ++;
-        }
-    }
+    // Use only the flags that are *before* the specified child index.
+    mixedFlagBits = mixedFlagBits >> (16u - childIndex * 2u);
     
-    return ptr;
+    // Count the number of mixed flag bits that are set.
+    return bitCount(childMask & mixedFlagBits);
 }
 
 /*
