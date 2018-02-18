@@ -148,8 +148,6 @@ public class SceneExporter
 
 	private void ExportScene(Camera camera, Light light, MeshRenderer[] renderers)
 	{
-		Array.Sort(renderers.Select(r => r.name).ToArray(), renderers);
-
 		var writer = new StringWriter();
 
 		WriteSceneCamera(writer, camera);
@@ -173,12 +171,22 @@ public class SceneExporter
 	
 	private int SortMeshRenderers(MeshRenderer a, MeshRenderer b)
 	{
-		// Get the features on each renderer
+		// Sort by shader features first
 		var aFeatures = (int)GetMaterialFeatures(a.sharedMaterial);
 		var bFeatures = (int)GetMaterialFeatures(b.sharedMaterial);
-
-		// Sort by features
-		return aFeatures - bFeatures;
+		if (aFeatures != bFeatures)
+			return aFeatures - bFeatures;
+		
+		// Then sort by material
+		if (a.sharedMaterial.name != b.sharedMaterial.name)
+			return a.sharedMaterial.name.CompareTo(b.sharedMaterial.name);
+				
+		// Then by mesh
+		if (a.GetComponent<MeshFilter>().sharedMesh.name != b.GetComponent<MeshFilter>().sharedMesh.name)
+			return a.GetComponent<MeshFilter>().sharedMesh.name.CompareTo(b.GetComponent<MeshFilter>().sharedMesh.name);
+				
+		// Otherwise sort by mesh renderer name
+		return a.name.CompareTo(b.name);
 	}
 
 	private void WriteSceneTransform(StringWriter writer, Transform transform)

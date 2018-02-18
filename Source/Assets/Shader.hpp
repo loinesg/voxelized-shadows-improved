@@ -54,27 +54,26 @@ public:
     Shader(const string &name, ShaderFeatureList features);
     ~Shader();
     
+    // Prevent shaders from being copied
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+    
+    // Allow a shader to be moved
+    Shader(Shader&& other);
+    Shader& operator=(Shader&& other);
+    
     // Feature management
     ShaderFeatureList features() const { return features_; }
     bool hasFeature(ShaderFeature feature) const;
     
     // Program and shader ids
     GLuint program() const { return program_; }
-    GLuint vertexShader() const { return vertexShader_; }
-    GLuint fragmentShader() const { return fragmentShader_; }
     
     void bind();
     
 private:
     ShaderFeatureList features_;
     GLuint program_;
-    GLuint vertexShader_;
-    GLuint fragmentShader_;
-    GLint mainTextureLoc_;
-    GLint normalMapTextureLoc_;
-    GLint shadowMapTextureLoc_;
-    GLint shadowMaskTextureLoc_;
-    GLint voxelDataTextureLoc_;
     
     // Shader compilation
     bool compileShader(GLenum type, const char* file, GLuint &id);
@@ -83,6 +82,9 @@ private:
     
     // Sets a uniform block binding
     void setUniformBlockBinding(const char* blockName, GLuint id);
+    
+    // Sets the texture id for the named texture
+    void setTextureBinding(const char* textureName, GLint id);
     
     // Creates a #define list for the enabled features
     string createFeatureDefines() const;

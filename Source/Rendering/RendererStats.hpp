@@ -25,7 +25,7 @@ struct RenderPassStats
 class RendererStats : protected QOpenGLFunctions_3_3_Core
 {
 private:
-    const int FramesPerSample = 200;
+    const int FramesPerSample = 500;
     
 public:
     RendererStats();

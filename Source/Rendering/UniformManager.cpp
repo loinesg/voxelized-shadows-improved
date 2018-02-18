@@ -14,44 +14,34 @@ UniformManager::~UniformManager()
     glDeleteBuffers(1, &voxelBlockID_);
 }
 
-void UniformManager::updatePerObjectBuffer(const PerObjectUniformBuffer &buffer)
+void UniformManager::updatePerObjectBuffer(const PerObjectUniformBuffer &buffer, int instanceCount)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, perObjectBlockID_);
-    GLvoid* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(map, &buffer, sizeof(PerObjectUniformBuffer));
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * instanceCount, &buffer, GL_DYNAMIC_DRAW);
 }
 
 void UniformManager::updateSceneBuffer(const SceneUniformBuffer &buffer)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, sceneBlockID_);
-    GLvoid* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(map, &buffer, sizeof(SceneUniformBuffer));
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(SceneUniformBuffer), &buffer, GL_DYNAMIC_DRAW);
 }
 
 void UniformManager::updateCameraBuffer(const CameraUniformBuffer &buffer)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, cameraBlockID_);
-    GLvoid* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(map, &buffer, sizeof(CameraUniformBuffer));
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraUniformBuffer), &buffer, GL_DYNAMIC_DRAW);
 }
 
 void UniformManager::updateShadowBuffer(const ShadowUniformBuffer &buffer)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, shadowBlockID_);
-    GLvoid* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(map, &buffer, sizeof(ShadowUniformBuffer));
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(ShadowUniformBuffer), &buffer, GL_DYNAMIC_DRAW);
 }
 
 void UniformManager::updateVoxelBuffer(const void* data, int sizeBytes)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, voxelBlockID_);
-    GLvoid* map = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(map, data, sizeBytes);
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBufferData(GL_UNIFORM_BUFFER, sizeBytes, data, GL_STATIC_DRAW);
 }
 
 void UniformManager::createBuffers()

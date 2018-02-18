@@ -15,7 +15,6 @@ class ShaderCollection
 {
 public:
     ShaderCollection(const string &name);
-    ~ShaderCollection();
     
     // The currently enabled features
     ShaderFeatureList enabledFeatures() const;
@@ -25,16 +24,12 @@ public:
     void disableFeature(ShaderFeature feature);
     void setSupportedFeatures(ShaderFeatureList supportedFeatures);
     
-    // Finding and loading variants
-    Shader* getVariant(ShaderFeatureList features);
+    // Finds and loading a shader variant
+    void bindVariant(ShaderFeatureList features);
     
 private:
     string shaderName_;
     ShaderFeatureList supportedFeatures_;
     ShaderFeatureList enabledFeatures_;
-    vector<Shader*> shaderVariants_;
-    
-    // Variant lookup and creation
-    Shader* findShader(ShaderFeatureList features) const;
-    Shader* createShader(ShaderFeatureList features);
+    vector<Shader> shaderVariants_;
 };

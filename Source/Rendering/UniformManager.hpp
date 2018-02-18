@@ -35,8 +35,16 @@ struct CameraUniformBuffer
     
     Vector4 screenResolution;
     Vector4 cameraPosition;
+    Matrix4x4 worldToView;
     Matrix4x4 viewProjection;
     Matrix4x4 clipToWorld;
+    
+    // World space direction vectors to the 4
+    // corners of the view frustum. Normalized.
+    Vector4 frustumCorners[4];
+    
+    // x = near, y = far plane distance
+    Vector4 cameraClipPlanes;
 };
 
 
@@ -84,7 +92,7 @@ public:
     UniformManager();
     ~UniformManager();
     
-    void updatePerObjectBuffer(const PerObjectUniformBuffer &buffer);
+    void updatePerObjectBuffer(const PerObjectUniformBuffer &buffer, int instanceCount);
     void updateSceneBuffer(const SceneUniformBuffer &buffer);
     void updateCameraBuffer(const CameraUniformBuffer &buffer);
     void updateShadowBuffer(const ShadowUniformBuffer &buffer);

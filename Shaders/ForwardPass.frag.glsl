@@ -7,12 +7,16 @@ layout(std140) uniform scene_data
     uniform vec3 _LightDirection;
 };
 
+// Camera uniform buffer
 layout(std140) uniform camera_data
 {
     uniform vec2 _ScreenResolution;
     uniform vec3 _CameraPosition;
+    uniform mat4x4 _WorldToView;
     uniform mat4x4 _ViewProjectionMatrix;
     uniform mat4x4 _ClipToWorld;
+    uniform vec4 _FrustumCorners[4];
+    uniform vec2 _CameraClipPlanes; // x = near, y = far
 };
 
 uniform sampler2D _MainTexture;

@@ -3,12 +3,13 @@
 #include <QImage>
 #include <cstdio>
 
-Texture::Texture(GLuint id, int width, int height, GLint internalFormat, GLenum format)
+Texture::Texture(GLuint id, int width, int height, GLint internalFormat, GLenum format, GLenum type)
     : id_(id),
     width_(width),
     height_(height),
     internalFormat_(internalFormat),
-    format_(format)
+    format_(format),
+    type_(type)
 {
     
 }
@@ -47,7 +48,7 @@ void Texture::setResolution(int width, int height)
     
     // Resize the texture
     glBindTexture(GL_TEXTURE_2D, id_);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat_, width, height, 0, format_, GL_UNSIGNED_BYTE, (void*)0);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat_, width, height, 0, format_, type_, (void*)0);
     
     // Store the new resolution
     width_ = width;
@@ -96,7 +97,7 @@ Texture* Texture::load(const char* fileName)
                  GL_UNSIGNED_BYTE,
                  QGLWidget::convertToGLFormat(image).bits());
     
-    Texture* texture = new Texture(id, image.width(), image.height(), GL_RGBA8, GL_RGBA);
+    Texture* texture = new Texture(id, image.width(), image.height(), GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
     texture->setWrapMode(GL_REPEAT, GL_REPEAT);
     texture->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
     texture->setMagFilter(GL_LINEAR);
@@ -112,7 +113,17 @@ Texture* Texture::depth(int width, int height)
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
     
-    return new Texture(texture, width, height, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT);
+    return new Texture(texture, width, height, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
+}
+
+Texture* Texture::linearDepth(int width, int height)
+{
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, width, height, 0, GL_RED, GL_UNSIGNED_SHORT, 0);
+    
+    return new Texture(texture, width, height, GL_R16, GL_RED, GL_UNSIGNED_SHORT);
 }
 
 Texture* Texture::singleChannel(int width, int height)
@@ -122,5 +133,5 @@ Texture* Texture::singleChannel(int width, int height)
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
     
-    return new Texture(texture, width, height, GL_RED, GL_RED);
+    return new Texture(texture, width, height, GL_RED, GL_RED, GL_UNSIGNED_BYTE);
 }

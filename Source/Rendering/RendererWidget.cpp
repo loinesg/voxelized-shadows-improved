@@ -117,13 +117,13 @@ void RendererWidget::initializeGL()
     
     glGenFramebuffers(1, &sceneDepthFBO_);
     
-    sceneDepthTexture_ = Texture::depth(1, 1);
+    sceneDepthTexture_ = Texture::linearDepth(1, 1);
     sceneDepthTexture_->setWrapMode(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     sceneDepthTexture_->setMagFilter(GL_NEAREST);
     sceneDepthTexture_->setMinFilter(GL_NEAREST);
     
     glBindFramebuffer(GL_FRAMEBUFFER, sceneDepthFBO_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, sceneDepthTexture_->id(), 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sceneDepthTexture_->id(), 0);
     
     // Create debug overlays
     // This is done last so overlays can reference other assets
@@ -201,10 +201,11 @@ void RendererWidget::createRenderPasses()
 {
     // Pass for rendering depth from the main camera
     // Depth only, so no features are needed except cutout.
-    string sceneDepthPassName = "DepthPass";
+    string sceneDepthPassName = "LinearDepthPass";
     sceneDepthPass_ = new RenderPass(sceneDepthPassName, uniformManager_);
     sceneDepthPass_->setSupportedFeatures(SF_Cutout);
-    sceneDepthPass_->setClearFlags(GL_DEPTH_BUFFER_BIT);
+    sceneDepthPass_->setClearColor(PassClearColor(1.0f, 1.0f, 1.0f, 1.0f));
+    sceneDepthPass_->setClearFlags(GL_COLOR_BUFFER_BIT);
     
     // Pass for rendering the final image.
     // Uses all features.
@@ -230,7 +231,7 @@ void RendererWidget::createOverlays()
     overlays_.push_back(shadowMapOverlay);
     
     // Scene depth overlay
-    Overlay* sceneDepthOverlay = new Overlay("Scene Depth", "DebugOverlay", SF_Debug_DepthTexture);
+    Overlay* sceneDepthOverlay = new Overlay("Scene Depth", "DebugOverlay", 0);
     sceneDepthOverlay->setFullScreen(true);
     sceneDepthOverlay->setUseBlending(false);
     sceneDepthOverlay->setTexture(sceneDepthTexture_);
@@ -283,17 +284,22 @@ void RendererWidget::renderSceneDepth()
     // Use the main camera
     scene_->mainCamera()->bind();
     
-    // Write to the depth framebuffer
+    // Write to the linear depth framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, sceneDepthFBO_);
     
-    // Write to the depth buffer only.
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glDepthMask(true);
-    glColorMask(false, false, false, false);
+    // We are writing linear depth to a float render target
+    // Dont use depth testing, write the min value to each channel
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_MIN);
+    glDepthMask(false);
+    glColorMask(true, true, true, true);
     
     // Render the scene depth map
     sceneDepthPass_->submit(scene_->mainCamera(), scene_->meshInstances());
+    
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 }
 
 void RendererWidget::renderShadowMask()
