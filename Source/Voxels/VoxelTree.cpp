@@ -288,8 +288,8 @@ void VoxelTree::updateUniformBuffer()
                 {
                     // Bitmask is non-zero. Include it in the filter kernel.
                     auto offsetData = &buffer.pcfOffsets[i*9 + lookupIndex];
-                    offsetData->xOffset = xOffset + 20;
-                    offsetData->yOffset = yOffset + 20;
+                    offsetData->xOffset = xOffset;
+                    offsetData->yOffset = yOffset;
                     offsetData->bitmaskHigh = bitmask >> 32;
                     offsetData->bitmaskLow = (uint32_t)bitmask;
                     
